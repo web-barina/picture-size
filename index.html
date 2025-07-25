@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Aspect Ratio Standardizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Icon Aspect Ratio Standardizer</h1>
+            <p>複数のアイコン画像を指定したアスペクト比に統一します</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <h3>画像をアップロード</h3>
+                        <p>複数の画像ファイルをドラッグ&ドロップするか、クリックして選択してください</p>
+                        <input type="file" id="fileInput" multiple accept="image/*" hidden>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                            ファイルを選択
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="settings-section">
+                <h3>出力設定</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="aspectRatio">アスペクト比:</label>
+                        <select id="aspectRatio">
+                            <option value="1:1">1:1 (正方形)</option>
+                            <option value="4:3">4:3 (標準)</option>
+                            <option value="16:9">16:9 (ワイド)</option>
+                            <option value="3:2">3:2 (写真)</option>
+                            <option value="2:1">2:1 (バナー)</option>
+                            <option value="custom">カスタム</option>
+                        </select>
+                    </div>
+                    <div class="setting-item custom-ratio" id="customRatio" style="display: none;">
+                        <label>カスタム比率:</label>
+                        <div class="ratio-inputs">
+                            <input type="number" id="customWidth" placeholder="幅" min="1" value="1">
+                            <span>:</span>
+                            <input type="number" id="customHeight" placeholder="高さ" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="outputSize">出力サイズ (px):</label>
+                        <select id="outputSize">
+                            <option value="512">512px</option>
+                            <option value="256">256px</option>
+                            <option value="128">128px</option>
+                            <option value="64">64px</option>
+                            <option value="1024">1024px</option>
+                            <option value="custom">カスタム</option>
+                        </select>
+                    </div>
+                    <div class="setting-item custom-size" id="customSize" style="display: none;">
+                        <label for="customSizeValue">カスタムサイズ (px):</label>
+                        <input type="number" id="customSizeValue" placeholder="サイズ" min="1" value="512">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="preview-section" id="previewSection" style="display: none;">
+                <h3>プレビュー</h3>
+                <div class="preview-grid" id="previewGrid"></div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="processBtn">画像を処理</button>
+                    <button class="btn btn-secondary" id="downloadAllBtn" style="display: none;">すべてダウンロード (ZIP)</button>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h3>処理結果</h3>
+                <div class="results-grid" id="resultsGrid"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
