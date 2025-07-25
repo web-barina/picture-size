@@ -48,3 +48,4 @@ python3 -m http.server 8000
 - UI/UXデザインでの素材準備
 - Figmaなどのデザインツールでの利用
 - アプリ開発でのアセット管理
+# picture-size
