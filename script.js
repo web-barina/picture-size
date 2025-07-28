@@ -250,10 +250,6 @@ class IconSquareProcessor {
                         mimeType = 'image/webp';
                         extension = 'webp';
                         break;
-                    case 'svg':
-                        mimeType = 'image/png'; // SVG will be rasterized to PNG
-                        extension = 'svg.png';
-                        break;
                     default: // png
                         mimeType = 'image/png';
                         extension = 'png';
