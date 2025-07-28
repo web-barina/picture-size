@@ -105,7 +105,6 @@ class IconSquareProcessor {
         if (document.getElementById('format-png').checked) formats.push('png');
         if (document.getElementById('format-jpeg').checked) formats.push('jpeg');
         if (document.getElementById('format-webp').checked) formats.push('webp');
-        if (document.getElementById('format-svg').checked) formats.push('svg');
         return formats;
     }
 
