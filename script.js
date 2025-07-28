@@ -335,23 +335,64 @@ class IconSquareProcessor {
     }
 
     async downloadAll() {
-        if (this.processedImages.length === 0) return;
+        console.log('downloadAll called, processedImages length:', this.processedImages.length);
         
-        const zip = new JSZip();
-        
-        this.processedImages.forEach((processedImage) => {
-            zip.file(processedImage.fileName, processedImage.blob);
-        });
+        if (this.processedImages.length === 0) {
+            alert('ダウンロードする画像がありません。');
+            return;
+        }
         
         try {
-            const content = await zip.generateAsync({type: 'blob'});
+            // Check if JSZip is available
+            if (typeof JSZip === 'undefined') {
+                alert('JSZipライブラリが読み込まれていません。');
+                return;
+            }
+            
+            const zip = new JSZip();
+            console.log('Creating ZIP with', this.processedImages.length, 'files');
+            
+            // Add files to ZIP
+            this.processedImages.forEach((processedImage, index) => {
+                console.log(`Adding file ${index + 1}:`, processedImage.fileName);
+                if (processedImage.blob) {
+                    zip.file(processedImage.fileName, processedImage.blob);
+                } else {
+                    console.error('Blob is missing for:', processedImage.fileName);
+                }
+            });
+            
+            console.log('Generating ZIP file...');
+            const content = await zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 6
+                }
+            });
+            
+            console.log('ZIP generated, size:', content.size, 'bytes');
+            
+            // Create download link
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
-            link.download = 'standardized_icons.zip';
+            link.download = 'processed_icons.zip';
+            
+            // Add link to document temporarily to ensure it works
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            
+            // Clean up object URL
+            setTimeout(() => {
+                URL.revokeObjectURL(link.href);
+            }, 100);
+            
+            console.log('ZIP download initiated');
+            
         } catch (error) {
             console.error('ZIP creation error:', error);
-            alert('ZIPファイルの作成中にエラーが発生しました。');
+            alert(`ZIPファイルの作成中にエラーが発生しました: ${error.message}`);
         }
     }
 }
