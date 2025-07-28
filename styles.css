@@ -157,6 +157,78 @@ section h3 {
     color: #667eea;
 }
 
+/* Position Grid */
+.position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 150px;
+}
+
+.position-grid input[type="radio"] {
+    display: none;
+}
+
+.position-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    background: #f8f9ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.position-btn:hover {
+    border-color: #667eea;
+    background: #e8ebff;
+    transform: scale(1.05);
+}
+
+.position-grid input[type="radio"]:checked + .position-btn {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* Format Checkboxes */
+.format-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+.checkbox-item input[type="checkbox"]:checked + label {
+    color: #667eea;
+    font-weight: 600;
+}
+
 /* Preview Section */
 .preview-grid {
     display: grid;

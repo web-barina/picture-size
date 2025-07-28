@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎨 Icon Aspect Ratio Standardizer</h1>
-            <p>複数のアイコン画像を指定したアスペクト比に統一します</p>
+            <h1>🎨 Icon Square Canvas Processor</h1>
+            <p>複数のアイコン画像を正方形キャンバスに統一し、指定の位置と形式で出力します</p>
         </header>
 
         <main>
@@ -34,26 +34,7 @@
                 <h3>出力設定</h3>
                 <div class="settings-grid">
                     <div class="setting-item">
-                        <label for="aspectRatio">アスペクト比:</label>
-                        <select id="aspectRatio">
-                            <option value="1:1">1:1 (正方形)</option>
-                            <option value="4:3">4:3 (標準)</option>
-                            <option value="16:9">16:9 (ワイド)</option>
-                            <option value="3:2">3:2 (写真)</option>
-                            <option value="2:1">2:1 (バナー)</option>
-                            <option value="custom">カスタム</option>
-                        </select>
-                    </div>
-                    <div class="setting-item custom-ratio" id="customRatio" style="display: none;">
-                        <label>カスタム比率:</label>
-                        <div class="ratio-inputs">
-                            <input type="number" id="customWidth" placeholder="幅" min="1" value="1">
-                            <span>:</span>
-                            <input type="number" id="customHeight" placeholder="高さ" min="1" value="1">
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="outputSize">出力サイズ (px):</label>
+                        <label for="outputSize">キャンバスサイズ (px):</label>
                         <select id="outputSize">
                             <option value="512">512px</option>
                             <option value="256">256px</option>
@@ -66,6 +47,60 @@
                     <div class="setting-item custom-size" id="customSize" style="display: none;">
                         <label for="customSizeValue">カスタムサイズ (px):</label>
                         <input type="number" id="customSizeValue" placeholder="サイズ" min="1" value="512">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label>アイコン配置位置:</label>
+                        <div class="position-grid">
+                            <input type="radio" id="pos-top-left" name="position" value="top-left">
+                            <label for="pos-top-left" class="position-btn">↖</label>
+                            
+                            <input type="radio" id="pos-top" name="position" value="top">
+                            <label for="pos-top" class="position-btn">↑</label>
+                            
+                            <input type="radio" id="pos-top-right" name="position" value="top-right">
+                            <label for="pos-top-right" class="position-btn">↗</label>
+                            
+                            <input type="radio" id="pos-left" name="position" value="left">
+                            <label for="pos-left" class="position-btn">←</label>
+                            
+                            <input type="radio" id="pos-center" name="position" value="center" checked>
+                            <label for="pos-center" class="position-btn">●</label>
+                            
+                            <input type="radio" id="pos-right" name="position" value="right">
+                            <label for="pos-right" class="position-btn">→</label>
+                            
+                            <input type="radio" id="pos-bottom-left" name="position" value="bottom-left">
+                            <label for="pos-bottom-left" class="position-btn">↙</label>
+                            
+                            <input type="radio" id="pos-bottom" name="position" value="bottom">
+                            <label for="pos-bottom" class="position-btn">↓</label>
+                            
+                            <input type="radio" id="pos-bottom-right" name="position" value="bottom-right">
+                            <label for="pos-bottom-right" class="position-btn">↘</label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label>出力形式:</label>
+                        <div class="format-checkboxes">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="format-png" checked>
+                                <label for="format-png">PNG (透過)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="format-jpeg">
+                                <label for="format-jpeg">JPEG (白背景)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="format-webp">
+                                <label for="format-webp">WebP (透過)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="format-svg">
+                                <label for="format-svg">SVG (ラスタライズ)</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

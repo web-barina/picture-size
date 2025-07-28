@@ -1,4 +1,4 @@
-class IconStandardizer {
+class IconSquareProcessor {
     constructor() {
         this.files = [];
         this.processedImages = [];
@@ -8,7 +8,6 @@ class IconStandardizer {
     initializeEventListeners() {
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
-        const aspectRatio = document.getElementById('aspectRatio');
         const outputSize = document.getElementById('outputSize');
         const processBtn = document.getElementById('processBtn');
         const downloadAllBtn = document.getElementById('downloadAllBtn');
@@ -33,7 +32,6 @@ class IconStandardizer {
         });
 
         // Settings change
-        aspectRatio.addEventListener('change', () => this.toggleCustomRatio());
         outputSize.addEventListener('change', () => this.toggleCustomSize());
 
         // Process button
@@ -79,16 +77,7 @@ class IconStandardizer {
         previewSection.style.display = 'block';
     }
 
-    toggleCustomRatio() {
-        const aspectRatio = document.getElementById('aspectRatio');
-        const customRatio = document.getElementById('customRatio');
-        
-        if (aspectRatio.value === 'custom') {
-            customRatio.style.display = 'flex';
-        } else {
-            customRatio.style.display = 'none';
-        }
-    }
+
 
     toggleCustomSize() {
         const outputSize = document.getElementById('outputSize');
@@ -101,24 +90,23 @@ class IconStandardizer {
         }
     }
 
-    getAspectRatio() {
-        const aspectRatio = document.getElementById('aspectRatio').value;
-        
-        if (aspectRatio === 'custom') {
-            const width = parseFloat(document.getElementById('customWidth').value) || 1;
-            const height = parseFloat(document.getElementById('customHeight').value) || 1;
-            return width / height;
+    getPosition() {
+        const positionInputs = document.querySelectorAll('input[name="position"]');
+        for (const input of positionInputs) {
+            if (input.checked) {
+                return input.value;
+            }
         }
-        
-        const ratios = {
-            '1:1': 1,
-            '4:3': 4/3,
-            '16:9': 16/9,
-            '3:2': 3/2,
-            '2:1': 2/1
-        };
-        
-        return ratios[aspectRatio] || 1;
+        return 'center'; // default
+    }
+
+    getSelectedFormats() {
+        const formats = [];
+        if (document.getElementById('format-png').checked) formats.push('png');
+        if (document.getElementById('format-jpeg').checked) formats.push('jpeg');
+        if (document.getElementById('format-webp').checked) formats.push('webp');
+        if (document.getElementById('format-svg').checked) formats.push('svg');
+        return formats;
     }
 
     getOutputSize() {
@@ -132,92 +120,158 @@ class IconStandardizer {
     }
 
     async processImages() {
-        const processBtn = document.getElementById('processBtn');
-        const resultsSection = document.getElementById('resultsSection');
-        const resultsGrid = document.getElementById('resultsGrid');
+        if (this.files.length === 0) {
+            alert('画像ファイルを選択してください。');
+            return;
+        }
+
+        const selectedFormats = this.getSelectedFormats();
+        if (selectedFormats.length === 0) {
+            alert('少なくとも1つの出力形式を選択してください。');
+            return;
+        }
+
+        const outputSize = this.getOutputSize();
+        const position = this.getPosition();
         
-        // Show processing state
-        processBtn.disabled = true;
-        processBtn.textContent = '処理中...';
-        resultsGrid.innerHTML = '<div class="processing"><div class="spinner"></div><p>画像を処理しています...</p></div>';
+        // Show processing indicator
+        const resultsSection = document.getElementById('resultsSection');
         resultsSection.style.display = 'block';
+        resultsSection.innerHTML = `
+            <h3>処理中...</h3>
+            <div class="processing">
+                <div class="spinner"></div>
+                <p>画像を処理しています...</p>
+            </div>
+        `;
         
         this.processedImages = [];
-        const aspectRatio = this.getAspectRatio();
-        const outputSize = this.getOutputSize();
         
         try {
-            for (let i = 0; i < this.files.length; i++) {
-                const file = this.files[i];
-                const processedImage = await this.processImage(file, aspectRatio, outputSize);
-                this.processedImages.push(processedImage);
+            for (const file of this.files) {
+                for (const format of selectedFormats) {
+                    const processedImage = await this.processImage(file, outputSize, position, format);
+                    this.processedImages.push(processedImage);
+                }
             }
             
             this.displayResults();
-            
         } catch (error) {
             console.error('Processing error:', error);
-            alert('画像の処理中にエラーが発生しました。');
+            alert('画像処理中にエラーが発生しました。');
         } finally {
+            const processBtn = document.getElementById('processBtn');
             processBtn.disabled = false;
             processBtn.textContent = '画像を処理';
         }
     }
 
-    async processImage(file, aspectRatio, outputSize) {
+    async processImage(file, outputSize, position, format) {
         return new Promise((resolve) => {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Calculate canvas dimensions based on aspect ratio
-                let canvasWidth, canvasHeight;
-                if (aspectRatio >= 1) {
-                    canvasWidth = outputSize;
-                    canvasHeight = outputSize / aspectRatio;
+                // Square canvas (1:1 aspect ratio)
+                canvas.width = outputSize;
+                canvas.height = outputSize;
+                
+                // Set background based on format
+                if (format === 'jpeg') {
+                    // White background for JPEG
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, outputSize, outputSize);
                 } else {
-                    canvasWidth = outputSize * aspectRatio;
-                    canvasHeight = outputSize;
+                    // Transparent background for PNG, WebP, SVG
+                    ctx.clearRect(0, 0, outputSize, outputSize);
                 }
                 
-                canvas.width = canvasWidth;
-                canvas.height = canvasHeight;
+                // Calculate icon size (keep original size, don't scale up)
+                const maxIconSize = Math.min(outputSize * 0.9, Math.max(img.width, img.height));
+                const scale = Math.min(maxIconSize / img.width, maxIconSize / img.height);
+                const iconWidth = img.width * scale;
+                const iconHeight = img.height * scale;
                 
-                // Calculate scaling to fit image within canvas while maintaining aspect ratio
-                const imgAspectRatio = img.width / img.height;
-                let drawWidth, drawHeight;
-                
-                if (imgAspectRatio > aspectRatio) {
-                    // Image is wider than target ratio
-                    drawWidth = canvasWidth;
-                    drawHeight = canvasWidth / imgAspectRatio;
-                } else {
-                    // Image is taller than target ratio
-                    drawHeight = canvasHeight;
-                    drawWidth = canvasHeight * imgAspectRatio;
+                // Calculate position based on user selection
+                let x, y;
+                switch (position) {
+                    case 'top-left':
+                        x = outputSize * 0.05;
+                        y = outputSize * 0.05;
+                        break;
+                    case 'top':
+                        x = (outputSize - iconWidth) / 2;
+                        y = outputSize * 0.05;
+                        break;
+                    case 'top-right':
+                        x = outputSize * 0.95 - iconWidth;
+                        y = outputSize * 0.05;
+                        break;
+                    case 'left':
+                        x = outputSize * 0.05;
+                        y = (outputSize - iconHeight) / 2;
+                        break;
+                    case 'center':
+                        x = (outputSize - iconWidth) / 2;
+                        y = (outputSize - iconHeight) / 2;
+                        break;
+                    case 'right':
+                        x = outputSize * 0.95 - iconWidth;
+                        y = (outputSize - iconHeight) / 2;
+                        break;
+                    case 'bottom-left':
+                        x = outputSize * 0.05;
+                        y = outputSize * 0.95 - iconHeight;
+                        break;
+                    case 'bottom':
+                        x = (outputSize - iconWidth) / 2;
+                        y = outputSize * 0.95 - iconHeight;
+                        break;
+                    case 'bottom-right':
+                        x = outputSize * 0.95 - iconWidth;
+                        y = outputSize * 0.95 - iconHeight;
+                        break;
+                    default:
+                        x = (outputSize - iconWidth) / 2;
+                        y = (outputSize - iconHeight) / 2;
                 }
                 
-                // Center the image
-                const x = (canvasWidth - drawWidth) / 2;
-                const y = (canvasHeight - drawHeight) / 2;
+                // Draw the icon
+                ctx.drawImage(img, x, y, iconWidth, iconHeight);
                 
-                // Clear canvas (transparent background)
-                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-                
-                // Draw image centered
-                ctx.drawImage(img, x, y, drawWidth, drawHeight);
+                // Get file extension and MIME type based on format
+                let mimeType, extension;
+                switch (format) {
+                    case 'jpeg':
+                        mimeType = 'image/jpeg';
+                        extension = 'jpg';
+                        break;
+                    case 'webp':
+                        mimeType = 'image/webp';
+                        extension = 'webp';
+                        break;
+                    case 'svg':
+                        mimeType = 'image/png'; // SVG will be rasterized to PNG
+                        extension = 'svg.png';
+                        break;
+                    default: // png
+                        mimeType = 'image/png';
+                        extension = 'png';
+                }
                 
                 // Convert to blob
                 canvas.toBlob((blob) => {
-                    const fileName = file.name.replace(/\.[^/.]+$/, '') + '_standardized.png';
+                    const baseName = file.name.replace(/\.[^/.]+$/, '');
+                    const fileName = `${baseName}_square_${position}.${extension}`;
                     resolve({
                         blob: blob,
                         fileName: fileName,
                         originalName: file.name,
-                        dataUrl: canvas.toDataURL('image/png')
+                        format: format,
+                        dataUrl: canvas.toDataURL(mimeType)
                     });
-                }, 'image/png');
+                }, mimeType);
             };
             
             img.src = URL.createObjectURL(file);
@@ -225,10 +279,17 @@ class IconStandardizer {
     }
 
     displayResults() {
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.innerHTML = `
+            <h3>処理結果 (${this.processedImages.length}個のファイル)</h3>
+            <div class="results-grid" id="resultsGrid"></div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="downloadAllBtn">すべてダウンロード (ZIP)</button>
+            </div>
+        `;
+        
         const resultsGrid = document.getElementById('resultsGrid');
         const downloadAllBtn = document.getElementById('downloadAllBtn');
-        
-        resultsGrid.innerHTML = '';
         
         this.processedImages.forEach((processedImage, index) => {
             const resultItem = document.createElement('div');
@@ -241,18 +302,34 @@ class IconStandardizer {
             filename.className = 'filename';
             filename.textContent = processedImage.fileName;
             
+            const formatBadge = document.createElement('div');
+            formatBadge.className = 'format-badge';
+            formatBadge.textContent = processedImage.format.toUpperCase();
+            formatBadge.style.cssText = `
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-bottom: 8px;
+            `;
+            
             const downloadBtn = document.createElement('button');
             downloadBtn.className = 'download-btn';
             downloadBtn.textContent = 'ダウンロード';
             downloadBtn.onclick = () => this.downloadSingle(processedImage);
             
+            resultItem.appendChild(formatBadge);
             resultItem.appendChild(img);
             resultItem.appendChild(filename);
             resultItem.appendChild(downloadBtn);
             resultsGrid.appendChild(resultItem);
         });
         
-        downloadAllBtn.style.display = 'block';
+        // Re-attach event listener for download all button
+        downloadAllBtn.addEventListener('click', () => this.downloadAll());
     }
 
     downloadSingle(processedImage) {
@@ -286,5 +363,5 @@ class IconStandardizer {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new IconStandardizer();
+    new IconSquareProcessor();
 });
